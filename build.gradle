@@ -1,0 +1,62 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
+}
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.internal.tasks.DefaultRealizableTaskCollection
+
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
+group 'de.saschat'
+version '1.0-pre1'
+
+allprojects {it ->
+    it.apply plugin: "com.github.johnrengelman.shadow"
+    plugins.withType(JavaPlugin) {
+
+        repositories {
+            mavenCentral()
+            maven {
+                name 'm2-dv8tion'
+                url 'https://m2.dv8tion.net/releases'
+            }
+        }
+
+        dependencies {
+            implementation 'net.dv8tion:JDA:4.3.0_334'
+            implementation 'com.google.code.gson:gson:2.8.9'
+            implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.14.1'
+        }
+    }
+}
+task buildModules() {
+    doLast { ite ->
+        var dependencyTasks = (ite.getDependsOn().stream().findFirst().get() as Set<?>) as Set<Object>;
+        var tasks = new ArrayList() as ArrayList<ShadowJar>
+        dependencyTasks.forEach(potential -> {
+            if(!(potential instanceof DefaultRealizableTaskCollection))
+                return
+            DefaultRealizableTaskCollection<?> taskColle = potential as DefaultRealizableTaskCollection<?>;
+            taskColle.stream().forEach(taskTask -> {if(taskTask instanceof ShadowJar) tasks.add(taskTask)})
+        })
+
+        var jars = new ArrayList() as ArrayList<File>;
+        tasks.forEach(task -> {
+            task.getOutputs().getFiles().forEach(file -> {
+                jars.add(file);
+            })
+        })
+        File modules = new File(buildDir, "modules");
+        modules.mkdirs();
+        jars.forEach(jar -> {
+            Files.copy(jar.toPath(), new File(modules, jar.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING)
+        })
+    }
+}
+buildModules.dependsOn subprojects.collect {it.path.startsWith(":modules") ? it.tasks.withType(ShadowJar.class) : [] }
+
+
+task build() {
+    dependsOn ":bot:shadowJar", tasks.named("buildModules")
+}

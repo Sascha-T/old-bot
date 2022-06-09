@@ -1,0 +1,5 @@
+rootProject.name = 'saschabot'
+
+include 'bot'
+include 'modules:music'
+

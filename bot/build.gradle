@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+group 'de.saschat'
+version '1.0-pre1'
+
+
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClass = "de.saschat.bot.Main"
+}
+shadowJar {
+
+}

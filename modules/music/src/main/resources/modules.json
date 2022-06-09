@@ -1,0 +1,6 @@
+{
+  "modules": [{
+    "class": "de.saschat.modules.music.MusicModule",
+    "version": "1.0.0-pre1"
+  }]
+}

@@ -1,0 +1,9 @@
+.gradle
+.idea
+build
+gradle
+
+bot/build
+modules/*/build
+
+run
